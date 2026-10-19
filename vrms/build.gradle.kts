@@ -8,10 +8,13 @@ group = "com.vrms"
 version = "0.0.1-SNAPSHOT"
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21)) // Use 17 or 21 (LTS) unless you specifically installed JDK 25
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
+
 
 repositories {
     mavenCentral()
@@ -33,14 +36,14 @@ dependencies {
 
     // Developer Tools & Lombok
     developmentOnly("org.springframework.boot:spring-boot-devtools")
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
+    compileOnly("org.projectlombok:lombok:1.18.36")
+    annotationProcessor("org.projectlombok:lombok:1.18.36")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
-    testCompileOnly("org.projectlombok:lombok")
-    testAnnotationProcessor("org.projectlombok:lombok")
+    testCompileOnly("org.projectlombok:lombok:1.18.36")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

@@ -6,13 +6,11 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "agency_config")
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class AgencyConfig {
 
@@ -36,5 +34,7 @@ public class AgencyConfig {
     private String address = "Phnom Penh & Siem Reap, Cambodia";
 
     private String logoUrl;
-}
 
+    public AgencyConfig() {
+    }
+}
