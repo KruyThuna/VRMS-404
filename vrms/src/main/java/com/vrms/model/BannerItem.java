@@ -8,7 +8,6 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.List;
 @Table(name = "banners")
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class BannerItem {
 
@@ -41,5 +39,7 @@ public class BannerItem {
     private String badgeText;
     private long badgeColorValue;
     private boolean active;
-}
 
+    public BannerItem() {
+    }
+}

@@ -6,7 +6,6 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -14,7 +13,6 @@ import java.time.LocalDate;
 @Table(name = "rentals")
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class Rental {
 
@@ -30,5 +28,7 @@ public class Rental {
     private boolean returned;
     private String status;
     private String notes;
-}
 
+    public Rental() {
+    }
+}

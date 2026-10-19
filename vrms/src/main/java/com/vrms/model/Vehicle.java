@@ -7,13 +7,11 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "vehicles")
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class Vehicle {
 
@@ -44,6 +42,9 @@ public class Vehicle {
 
     private String plate;
 
+    public Vehicle() {
+    }
+
     public int getRate() {
         return dailyCents;
     }
@@ -54,4 +55,3 @@ public class Vehicle {
         }
     }
 }
-

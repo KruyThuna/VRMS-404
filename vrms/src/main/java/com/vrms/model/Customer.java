@@ -6,13 +6,11 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "customers")
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class Customer {
 
@@ -25,5 +23,7 @@ public class Customer {
     private String driverLicense;
     private String nationalId;
     private int totalSpentCents;
-}
 
+    public Customer() {
+    }
+}
