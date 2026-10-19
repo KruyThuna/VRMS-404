@@ -1,0 +1,49 @@
+# ==============================================================================
+# VRMS-404 Root .gitignore
+# ==============================================================================
+
+# OS & Temporary Files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+
+# Environment & Secret files
+.env
+!.env.example
+
+# IDE & Editor Settings
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+
+# ==============================================================================
+# Backend: Spring Boot & Gradle (vrms/)
+# ==============================================================================
+vrms/.gradle/
+vrms/build/
+vrms/out/
+vrms/bin/
+!vrms/gradle/wrapper/gradle-wrapper.jar
+vrms/.apt_generated
+vrms/.classpath
+vrms/.factorypath
+vrms/.project
+vrms/.settings
+vrms/.springBeans
+vrms/.sts4-cache
+
+# ==============================================================================
+# Frontend: Flutter & Dart (vehicle_rental/)
+# ==============================================================================
+vehicle_rental/.dart_tool/
+vehicle_rental/.flutter-plugins
+vehicle_rental/.flutter-plugins-dependencies
+vehicle_rental/build/
+vehicle_rental/.pub-cache/
+vehicle_rental/.pub/
