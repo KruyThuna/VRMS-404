@@ -320,3 +320,4 @@ INSERT INTO `rental_inquiries` (
   'Interested in renting the 7-seat Tiggo 9 for a family road trip to Siem Reap next weekend.',
   NOW()
 );
+
