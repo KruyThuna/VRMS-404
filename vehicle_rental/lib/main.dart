@@ -15,6 +15,7 @@ import 'src/screens/admin/widgets/booking_form_dialog.dart';
 import 'src/screens/admin/widgets/booking_details_dialog.dart';
 import 'src/screens/admin/widgets/payment_form_dialog.dart';
 import 'src/screens/admin/widgets/payment_details_dialog.dart';
+import 'src/screens/admin/widgets/khqr_payment_dialog.dart';
 import 'src/screens/admin/widgets/return_vehicle_dialog.dart';
 import 'src/localization/app_language.dart';
 import 'src/localization/language_selector_widget.dart';
@@ -89,6 +90,7 @@ class _RentalHomeState extends State<RentalHome> {
   String selectedPaymentStatus = 'All';
 
   RentalStore get s => widget.store;
+  bool get isKhmer => s.language == AppLanguage.khmer;
 
   static const Color brandRed = Color(0xFFE50914);
   static const Color brandEmerald = Color(0xFF10B981);
@@ -677,6 +679,17 @@ class _RentalHomeState extends State<RentalHome> {
                     onPressed: () => go(6),
                     icon: const Icon(Icons.assignment_return_outlined, size: 18),
                     label: Text(s.t('return_car'),
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFFE12326),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12)),
+                    onPressed: openQuickKhqrPayDialog,
+                    icon: const Icon(Icons.qr_code_scanner_rounded, size: 18),
+                    label: Text(
+                        isKhmer ? 'QR Code បង់ប្រាក់' : 'QR Payment KHQR',
                         style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ],
@@ -3674,6 +3687,26 @@ class _RentalHomeState extends State<RentalHome> {
                   ),
                 ),
 
+              // Quick Scan KHQR (if balance > 0)
+              if (balance > 0)
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFE12326),
+                    foregroundColor: Colors.white,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () => showKhqrPaymentDialog(r),
+                  icon: const Icon(Icons.qr_code_2_rounded, size: 15),
+                  label: Text(
+                    isKhmer ? 'KHQR' : 'KHQR Pay',
+                    style: const TextStyle(
+                        fontSize: 11, fontWeight: FontWeight.bold),
+                  ),
+                ),
+
               // Quick Full Settle (if balance > 0)
               if (balance > 0)
                 FilledButton.tonal(
@@ -3766,6 +3799,109 @@ class _RentalHomeState extends State<RentalHome> {
         onSaved: () => setState(() {}),
       ),
     );
+  }
+
+  Future<void> showKhqrPaymentDialog(Rental r, {double? amount}) async {
+    await showDialog<void>(
+      context: context,
+      builder: (_) => KhqrPaymentDialog(
+        store: s,
+        rental: r,
+        amount: amount,
+        onPaymentCompleted: () => setState(() {}),
+      ),
+    );
+  }
+
+  Future<void> openQuickKhqrPayDialog() async {
+    if (s.rentals.isEmpty) {
+      message(isKhmer ? 'មិនមានការកក់រថយន្តនៅឡើយទេ' : 'No rental records found');
+      return;
+    }
+
+    final unpaid = s.rentals.where((r) => r.balanceCents > 0).toList();
+    final targetRentals = unpaid.isNotEmpty ? unpaid : s.rentals;
+
+    if (targetRentals.length == 1) {
+      await showKhqrPaymentDialog(targetRentals.first);
+      return;
+    }
+
+    final selected = await showDialog<Rental>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE12326).withAlpha(25),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.qr_code_2_rounded,
+                  color: Color(0xFFE12326), size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                isKhmer
+                    ? 'ជ្រើសរើសការកក់ដើម្បីបង្ហាញ KHQR'
+                    : 'Select Rental for KHQR Payment',
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: 480,
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: targetRentals.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (ctx, i) {
+              final item = targetRentals[i];
+              final c = s.customer(item.customerId);
+              final v = s.vehicle(item.vehicleId);
+              final bal = item.balanceCents / 100.0;
+              return ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFFFFF1F2),
+                  child: Icon(Icons.receipt_rounded,
+                      color: Color(0xFFE12326), size: 20),
+                ),
+                title: Text('${c.name} • ${v.brand} ${v.name}',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 13)),
+                subtitle: Text(
+                  'ID: ${item.id} • ${item.status(DateTime.now()).toUpperCase()} • Due: \$${bal.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: bal > 0 ? AppColors.brandRed : AppColors.brandEmerald,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
+                onTap: () => Navigator.pop(ctx, item),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(s.t('cancel')),
+          ),
+        ],
+      ),
+    );
+
+    if (selected != null) {
+      await showKhqrPaymentDialog(selected);
+    }
   }
 
   Future<void> viewPaymentDetails(Rental r) async {

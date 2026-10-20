@@ -5,6 +5,7 @@ import 'package:vehicle_rental/main.dart';
 import 'package:vehicle_rental/store.dart';
 import 'package:vehicle_rental/src/screens/admin/widgets/payment_form_dialog.dart';
 import 'package:vehicle_rental/src/screens/admin/widgets/payment_details_dialog.dart';
+import 'package:vehicle_rental/src/screens/admin/widgets/khqr_payment_dialog.dart';
 
 void main() {
   testWidgets(
@@ -218,5 +219,50 @@ void main() {
     await tester.tap(find.byIcon(Icons.close_rounded));
     await tester.pumpAndSettle();
     expect(find.byType(PaymentFormDialog), findsNothing);
+  });
+
+  testWidgets('Payment CRUD: KhqrPaymentDialog displays KHQR and confirms payment',
+      (tester) async {
+    tester.view.physicalSize = const Size(1280, 1024);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final store = RentalStore(prefs);
+
+    final rental = store.rentals.first;
+    await store.resetRentalPayment(rental.id);
+
+    bool callbackFired = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: KhqrPaymentDialog(
+            store: store,
+            rental: rental,
+            amount: 50.0,
+            onPaymentCompleted: () {
+              callbackFired = true;
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify KHQR UI elements
+    expect(find.text('KHQR'), findsOneWidget);
+    expect(find.text('Scan to Pay'), findsOneWidget);
+    expect(find.text('50.00'), findsOneWidget);
+    expect(find.text('Confirm Received'), findsOneWidget);
+
+    // Tap confirm received
+    await tester.tap(find.text('Confirm Received'));
+    await tester.pumpAndSettle();
+
+    expect(callbackFired, isTrue);
+    expect(store.rentals.first.paidCents, 5000);
   });
 }

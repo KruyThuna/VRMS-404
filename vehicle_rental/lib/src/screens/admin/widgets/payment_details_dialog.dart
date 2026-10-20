@@ -4,6 +4,7 @@ import '../../../../store.dart';
 import '../../../shared/app_colors.dart';
 import '../../../shared/smart_image.dart';
 import '../../../localization/app_language.dart';
+import 'khqr_payment_dialog.dart';
 import 'payment_form_dialog.dart';
 
 class PaymentDetailsDialog extends StatelessWidget {
@@ -514,6 +515,21 @@ class PaymentDetailsDialog extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         FilledButton.icon(
+                          onPressed: () => _openKhqrPayment(context),
+                          icon: const Icon(Icons.qr_code_2_rounded, size: 16),
+                          label: Text(
+                            isKhmer ? 'KHQR បង់ប្រាក់' : 'Scan KHQR',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFFE12326),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton.icon(
                           onPressed: () => _openRecordPayment(context),
                           icon: const Icon(Icons.add_card_rounded, size: 16),
                           label: Text(
@@ -544,6 +560,20 @@ class PaymentDetailsDialog extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _openKhqrPayment(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => KhqrPaymentDialog(
+        store: store,
+        rental: rental,
+        onPaymentCompleted: () {
+          onUpdated();
+          if (context.mounted) Navigator.of(context).pop();
+        },
       ),
     );
   }

@@ -4,6 +4,7 @@ import '../../../../store.dart';
 import '../../../shared/app_colors.dart';
 import '../../../shared/smart_image.dart';
 import '../../../localization/app_language.dart';
+import 'khqr_payment_dialog.dart';
 
 class PaymentFormDialog extends StatefulWidget {
   final RentalStore store;
@@ -412,6 +413,77 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
                             );
                           }).toList(),
                         ),
+                        if (_selectedMethod == 'ABA KHQR' && r != null) ...[
+                          const SizedBox(height: 12),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF1F2),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0xFFFDA4AF)),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE12326),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(Icons.qr_code_2_rounded, color: Colors.white, size: 22),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        isKhmer ? 'ស្កេនទូទាត់ជាមួយ KHQR / Bakong' : 'Scan & Pay via KHQR / Bakong',
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF9F1239)),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        isKhmer ? 'បង្ហាញ QR កូដភ្លាមៗដើម្បីឱ្យអតិថិជនស្កេនបង់' : 'Present dynamic QR code to customer immediately',
+                                        style: const TextStyle(fontSize: 11, color: Color(0xFFBE123C)),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                FilledButton.icon(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFFE12326),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
+                                  onPressed: () {
+                                    final amt = double.tryParse(_amountController.text.trim()) ?? (r.balanceCents / 100);
+                                    showDialog<void>(
+                                      context: context,
+                                      builder: (_) => KhqrPaymentDialog(
+                                        store: store,
+                                        rental: r,
+                                        amount: amt > 0 ? amt : (r.balanceCents / 100),
+                                        onPaymentCompleted: () {
+                                          widget.onSaved();
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.qr_code_rounded, size: 16),
+                                  label: Text(
+                                    isKhmer ? 'បង្ហាញ QR' : 'Show QR',
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 16),
+
                         // Payment Date
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
