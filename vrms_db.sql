@@ -154,6 +154,11 @@ CREATE TABLE `agency_config` (
   `email` VARCHAR(255) DEFAULT 'booking@driveline-rental.com',
   `address` VARCHAR(255) DEFAULT 'Phnom Penh & Siem Reap, Cambodia',
   `logoUrl` VARCHAR(2048) DEFAULT NULL,
+  `paymentQrUrl` VARCHAR(2048) DEFAULT NULL,
+  `bankName` VARCHAR(255) DEFAULT 'ABA Bank',
+  `accountName` VARCHAR(255) DEFAULT 'DriveLine Rental',
+  `accountNumber` VARCHAR(255) DEFAULT '000 892 112',
+  `khqrData` VARCHAR(2048) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -294,7 +299,8 @@ INSERT INTO `rentals` (
 -- 6. Insert Agency Configuration
 -- ----------------------------------------------------------------------------
 INSERT INTO `agency_config` (
-  `id`, `companyName`, `companySlogan`, `phone`, `email`, `address`, `logoUrl`
+  `id`, `companyName`, `companySlogan`, `phone`, `email`, `address`, `logoUrl`,
+  `paymentQrUrl`, `bankName`, `accountName`, `accountNumber`, `khqrData`
 ) VALUES
 (
   'default',
@@ -303,6 +309,11 @@ INSERT INTO `agency_config` (
   '+855 23 999 888',
   'booking@driveline-rental.com',
   'Phnom Penh & Siem Reap, Cambodia',
+  NULL,
+  NULL,
+  'ABA Bank',
+  'DriveLine Rental',
+  '000 892 112',
   NULL
 );
 

@@ -5,6 +5,7 @@ import '../../../shared/app_colors.dart';
 import '../../../shared/smart_image.dart';
 import '../../../localization/app_language.dart';
 import 'khqr_payment_dialog.dart';
+import 'post_payment_qr_dialog.dart';
 
 class PaymentFormDialog extends StatefulWidget {
   final RentalStore store;
@@ -477,6 +478,20 @@ class _PaymentFormDialogState extends State<PaymentFormDialog> {
                                     isKhmer ? 'បង្ហាញ QR' : 'Show QR',
                                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                                   ),
+                                ),
+                                const SizedBox(width: 6),
+                                IconButton(
+                                  icon: const Icon(Icons.tune_rounded, size: 18, color: Color(0xFFE12326)),
+                                  tooltip: isKhmer ? 'ផ្លាស់ប្តូរ QR Code' : 'Change QR Code',
+                                  onPressed: () {
+                                    showDialog<void>(
+                                      context: context,
+                                      builder: (_) => PostPaymentQrDialog(
+                                        store: store,
+                                        onSaved: () => setState(() {}),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ],
                             ),

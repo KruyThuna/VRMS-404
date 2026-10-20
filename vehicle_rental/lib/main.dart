@@ -16,6 +16,7 @@ import 'src/screens/admin/widgets/booking_details_dialog.dart';
 import 'src/screens/admin/widgets/payment_form_dialog.dart';
 import 'src/screens/admin/widgets/payment_details_dialog.dart';
 import 'src/screens/admin/widgets/khqr_payment_dialog.dart';
+import 'src/screens/admin/widgets/post_payment_qr_dialog.dart';
 import 'src/screens/admin/widgets/return_vehicle_dialog.dart';
 import 'src/localization/app_language.dart';
 import 'src/localization/language_selector_widget.dart';
@@ -686,10 +687,10 @@ class _RentalHomeState extends State<RentalHome> {
                         backgroundColor: const Color(0xFFE12326),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 12)),
-                    onPressed: openQuickKhqrPayDialog,
-                    icon: const Icon(Icons.qr_code_scanner_rounded, size: 18),
+                    onPressed: postPaymentQrDialog,
+                    icon: const Icon(Icons.qr_code_2_rounded, size: 18),
                     label: Text(
-                        isKhmer ? 'QR Code បង់ប្រាក់' : 'QR Payment KHQR',
+                        isKhmer ? 'បង្ហោះ / កែ QR Code' : 'Post Payment QR',
                         style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ],
@@ -3801,6 +3802,16 @@ class _RentalHomeState extends State<RentalHome> {
     );
   }
 
+  Future<void> postPaymentQrDialog() async {
+    await showDialog<void>(
+      context: context,
+      builder: (_) => PostPaymentQrDialog(
+        store: s,
+        onSaved: () => setState(() {}),
+      ),
+    );
+  }
+
   Future<void> showKhqrPaymentDialog(Rental r, {double? amount}) async {
     await showDialog<void>(
       context: context,
@@ -4549,6 +4560,71 @@ class _AgencyBrandSettingsTabState extends State<_AgencyBrandSettingsTab> {
                 decoration: const InputDecoration(
                     labelText: 'Showroom Location / Address'),
               ),
+              const SizedBox(height: 18),
+
+              // Payment QR Code Card in Settings
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF1F2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFFDA4AF)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE12326),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.qr_code_2_rounded,
+                          color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Payment QR Code (${widget.store.agencyConfig.bankName})',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Color(0xFF9F1239),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Account: ${widget.store.agencyConfig.accountName} • ${widget.store.agencyConfig.accountNumber}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFFBE123C),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFFE12326),
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () {
+                        showDialog<void>(
+                          context: context,
+                          builder: (_) => PostPaymentQrDialog(
+                            store: widget.store,
+                            onSaved: () => setState(() {}),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.edit_rounded, size: 16),
+                      label: const Text('Change QR Code'),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 20),
               FilledButton.icon(
                 style: FilledButton.styleFrom(
@@ -4557,21 +4633,22 @@ class _AgencyBrandSettingsTabState extends State<_AgencyBrandSettingsTab> {
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 ),
                 onPressed: () {
-                  final config = AgencyConfig(
+                  final currentCfg = widget.store.agencyConfig;
+                  final config = currentCfg.copyWith(
                     companyName: _nameCtrl.text.trim().isEmpty
                         ? 'DriveLine'
                         : _nameCtrl.text.trim(),
                     companySlogan: _sloganCtrl.text.trim().isEmpty
-                        ? 'CAR AGENCY'
+                        ? 'CAR RENTAL'
                         : _sloganCtrl.text.trim(),
                     phone: _phoneCtrl.text.trim().isEmpty
-                        ? '+92 300 1234567'
+                        ? '+855 23 999 888'
                         : _phoneCtrl.text.trim(),
                     email: _emailCtrl.text.trim().isEmpty
-                        ? 'info@driveline.pk'
+                        ? 'booking@driveline-rental.com'
                         : _emailCtrl.text.trim(),
                     address: _addrCtrl.text.trim().isEmpty
-                        ? 'Lahore, Pakistan'
+                        ? 'Phnom Penh & Siem Reap, Cambodia'
                         : _addrCtrl.text.trim(),
                     logoUrl: _logoUrl,
                   );

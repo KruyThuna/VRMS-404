@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../models/vehicle.dart';
 import '../../models/customer.dart';
 import '../../models/rental.dart';
@@ -1888,6 +1889,16 @@ class _RentalCartState extends State<RentalCart> {
   }
 
   Widget _buildKhqrBox(int amountToPayCents) {
+    final cfg = widget.store.agencyConfig;
+    final hasCustomQrImage = cfg.paymentQrUrl != null && cfg.paymentQrUrl!.trim().isNotEmpty;
+    final bankName = cfg.bankName.isNotEmpty ? cfg.bankName : 'Bakong';
+    final merchantName = cfg.accountName.isNotEmpty ? cfg.accountName : cfg.companyName;
+    final accountNumber = cfg.accountNumber.isNotEmpty ? cfg.accountNumber : '000 892 112';
+    final amtUsd = (amountToPayCents / 100.0).toStringAsFixed(2);
+    final qrData = cfg.khqrData?.isNotEmpty == true
+        ? cfg.khqrData!
+        : 'https://checkout.bakong.nbc.gov.kh/qr?merchant=${Uri.encodeComponent(merchantName)}&account=${Uri.encodeComponent(accountNumber)}&amount=$amtUsd&currency=USD';
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -1921,10 +1932,10 @@ class _RentalCartState extends State<RentalCart> {
                         child: const Text('KHQR', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: Color(0xFFE11D48))),
                       ),
                       const SizedBox(width: 8),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Bakong National Payment',
-                          style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                          '$bankName National Payment',
+                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -1944,68 +1955,58 @@ class _RentalCartState extends State<RentalCart> {
             child: Column(
               children: [
                 Text(
-                  widget.store.agencyConfig.companyName.toUpperCase(),
+                  merchantName.toUpperCase(),
                   style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 0.8, color: Color(0xFF0F172A)),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   widget.store.language == AppLanguage.khmer
-                      ? 'គណនីទូទាត់ផ្លូវការ (USD)'
-                      : 'Official Merchant Account (USD)',
+                      ? 'គណនី: $accountNumber ($bankName)'
+                      : 'Account: $accountNumber ($bankName)',
                   style: const TextStyle(fontSize: 10, color: Color(0xFF64748B)),
                 ),
                 const SizedBox(height: 10),
 
-                // QR Box Simulation
+                // QR Box (Custom Image or Dynamic KHQR)
                 Container(
                   width: 140,
                   height: 140,
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(hasCustomQrImage ? 4 : 8),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: const Color(0xFF0F172A), width: 2),
                   ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _qrCorner(),
-                              _qrCorner(),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _qrCorner(),
-                              Container(
-                                width: 26,
-                                height: 26,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF0F172A),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Icon(Icons.qr_code_2_rounded, size: 18, color: Colors.white),
+                  child: hasCustomQrImage
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: SmartImage(
+                            imageSource: cfg.paymentQrUrl!,
+                            fit: BoxFit.contain,
+                            fallback: Center(
+                              child: Text(
+                                merchantName,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                               ),
-                            ],
+                            ),
                           ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE11D48),
-                          borderRadius: BorderRadius.circular(6),
+                        )
+                      : Center(
+                          child: QrImageView(
+                            data: qrData,
+                            version: QrVersions.auto,
+                            size: 124,
+                            eyeStyle: const QrEyeStyle(
+                              eyeShape: QrEyeShape.square,
+                              color: Color(0xFF0F172A),
+                            ),
+                            dataModuleStyle: const QrDataModuleStyle(
+                              dataModuleShape: QrDataModuleShape.square,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
                         ),
-                        child: const Text('KHQR', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900)),
-                      ),
-                    ],
-                  ),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -2022,25 +2023,6 @@ class _RentalCartState extends State<RentalCart> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _qrCorner() {
-    return Container(
-      width: 26,
-      height: 26,
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Container(
-        color: Colors.white,
-        padding: const EdgeInsets.all(3),
-        child: Container(
-          color: const Color(0xFF0F172A),
-        ),
       ),
     );
   }

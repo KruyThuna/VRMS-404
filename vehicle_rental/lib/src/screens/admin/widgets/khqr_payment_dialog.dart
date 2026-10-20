@@ -5,6 +5,8 @@ import '../../../../models.dart';
 import '../../../../store.dart';
 import '../../../localization/app_language.dart';
 import '../../../shared/app_colors.dart';
+import '../../../shared/smart_image.dart';
+import 'post_payment_qr_dialog.dart';
 
 /// Modal dialog displaying a professional Cambodian KHQR / Bakong payment QR code.
 class KhqrPaymentDialog extends StatelessWidget {
@@ -31,13 +33,23 @@ class KhqrPaymentDialog extends StatelessWidget {
 
   int get amountKhr => (payAmount * 4100).round();
 
-  String get merchantName => store.agencyConfig.companyName.toUpperCase();
+  String get merchantName => (store.agencyConfig.accountName.isNotEmpty
+          ? store.agencyConfig.accountName
+          : store.agencyConfig.companyName)
+      .toUpperCase();
+
+  String get accountNumber => store.agencyConfig.accountNumber.isNotEmpty
+      ? store.agencyConfig.accountNumber
+      : '000 892 112';
 
   String get qrData {
+    if (store.agencyConfig.khqrData?.isNotEmpty == true) {
+      return store.agencyConfig.khqrData!;
+    }
     // Standardized KHQR payment intent string
     final ref = 'REC-${rental.id}';
     final amtStr = payAmount.toStringAsFixed(2);
-    return 'https://checkout.bakong.nbc.gov.kh/qr?merchant=$merchantName&account=driveline_vrms@aba&amount=$amtStr&currency=USD&ref=$ref';
+    return 'https://checkout.bakong.nbc.gov.kh/qr?merchant=${Uri.encodeComponent(merchantName)}&account=${Uri.encodeComponent(accountNumber)}&amount=$amtStr&currency=USD&ref=$ref';
   }
 
   @override
@@ -110,11 +122,32 @@ class KhqrPaymentDialog extends StatelessWidget {
                         ),
                       ],
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      onPressed: () => Navigator.of(context).pop(),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.tune_rounded, color: Colors.white, size: 18),
+                          tooltip: isKhmer ? 'ផ្លាស់ប្តូរ QR Code' : 'Change QR Code',
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            showDialog<void>(
+                              context: context,
+                              builder: (_) => PostPaymentQrDialog(
+                                store: store,
+                                onSaved: () => onPaymentCompleted?.call(),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 12),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -206,7 +239,7 @@ class KhqrPaymentDialog extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
 
-                    // The Dynamic QR Code Box
+                    // The Dynamic or Custom QR Code Box
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -221,44 +254,63 @@ class KhqrPaymentDialog extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          QrImageView(
-                            data: qrData,
-                            version: QrVersions.auto,
-                            size: 190,
-                            padding: const EdgeInsets.all(4),
-                            eyeStyle: const QrEyeStyle(
-                              eyeShape: QrEyeShape.square,
-                              color: Color(0xFFE12326),
-                            ),
-                            dataModuleStyle: const QrDataModuleStyle(
-                              dataModuleShape: QrDataModuleShape.square,
-                              color: Color(0xFF0F172A),
-                            ),
-                          ),
-                          // Small Center Logo Emblem
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withAlpha(30),
-                                  blurRadius: 6,
+                      child: store.agencyConfig.paymentQrUrl != null &&
+                              store.agencyConfig.paymentQrUrl!.trim().isNotEmpty
+                          ? SizedBox(
+                              width: 190,
+                              height: 190,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: SmartImage(
+                                  imageSource: store.agencyConfig.paymentQrUrl!,
+                                  fit: BoxFit.contain,
+                                  fallback: Center(
+                                    child: Text(
+                                      merchantName,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                QrImageView(
+                                  data: qrData,
+                                  version: QrVersions.auto,
+                                  size: 190,
+                                  padding: const EdgeInsets.all(4),
+                                  eyeStyle: const QrEyeStyle(
+                                    eyeShape: QrEyeShape.square,
+                                    color: Color(0xFFE12326),
+                                  ),
+                                  dataModuleStyle: const QrDataModuleStyle(
+                                    dataModuleShape: QrDataModuleShape.square,
+                                    color: Color(0xFF0F172A),
+                                  ),
+                                ),
+                                // Small Center Logo Emblem
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withAlpha(30),
+                                        blurRadius: 6,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.directions_car_rounded,
+                                    size: 20,
+                                    color: Color(0xFFE12326),
+                                  ),
                                 ),
                               ],
                             ),
-                            child: const Icon(
-                              Icons.directions_car_rounded,
-                              size: 20,
-                              color: Color(0xFFE12326),
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                     const SizedBox(height: 16),
 

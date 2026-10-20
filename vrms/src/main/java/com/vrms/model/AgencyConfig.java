@@ -35,6 +35,19 @@ public class AgencyConfig {
 
     private String logoUrl;
 
+    private String paymentQrUrl;
+
+    @Builder.Default
+    private String bankName = "ABA Bank";
+
+    @Builder.Default
+    private String accountName = "DriveLine Rental";
+
+    @Builder.Default
+    private String accountNumber = "000 892 112";
+
+    private String khqrData;
+
     public AgencyConfig() {
     }
 }
