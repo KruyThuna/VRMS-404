@@ -4,11 +4,11 @@
 -- Target RDBMS: MySQL 8.0+ / MariaDB 10.5+
 -- ============================================================================
 
-CREATE DATABASE IF NOT EXISTS `vrms`
+CREATE DATABASE IF NOT EXISTS `vrms_db`
   DEFAULT CHARACTER SET utf8mb4
   COLLATE utf8mb4_0900_ai_ci;
 
-USE `vrms`;
+USE `vrms_db`;
 
 -- Temporarily disable foreign key checks during schema rebuild
 SET FOREIGN_KEY_CHECKS = 0;
