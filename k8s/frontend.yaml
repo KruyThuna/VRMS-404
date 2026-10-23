@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vrms-frontend
+  namespace: vrms
+  labels:
+    app: vrms-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vrms-frontend
+  template:
+    metadata:
+      labels:
+        app: vrms-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/kruythuna/vrms-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vrms-frontend-service
+  namespace: vrms
+spec:
+  selector:
+    app: vrms-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+  type: ClusterIP
+

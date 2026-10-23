@@ -1,0 +1,59 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vrms-ingress
+  namespace: vrms
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+spec:
+  tls:
+    - hosts:
+        - camonline.store
+        - www.camonline.store
+        - api.camapp.store
+        - vrms.camapp.store
+      secretName: vrms-tls-secret
+  rules:
+    - host: camonline.store
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vrms-frontend-service
+                port:
+                  number: 80
+    - host: www.camonline.store
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vrms-frontend-service
+                port:
+                  number: 80
+    - host: vrms.camapp.store
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vrms-frontend-service
+                port:
+                  number: 80
+    - host: api.camapp.store
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vrms-backend-service
+                port:
+                  number: 8080
+

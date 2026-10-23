@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vrms-backend
+  namespace: vrms
+  labels:
+    app: vrms-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vrms-backend
+  template:
+    metadata:
+      labels:
+        app: vrms-backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/kruythuna/vrms-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: vrms-config
+                  key: SPRING_DATASOURCE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: vrms-config
+                  key: SPRING_DATASOURCE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: vrms-secrets
+                  key: MYSQL_ROOT_PASSWORD
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              valueFrom:
+                configMapKeyRef:
+                  name: vrms-config
+                  key: SPRING_JPA_HIBERNATE_DDL_AUTO
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: vrms-config
+                  key: SERVER_PORT
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1024Mi"
+              cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vrms-backend-service
+  namespace: vrms
+spec:
+  selector:
+    app: vrms-backend
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  type: ClusterIP
+
