@@ -1,0 +1,9 @@
+name = "vrms-404"
+compatibility_date = "2024-09-23"
+
+# Cloudflare static assets configuration
+[assets]
+directory = "vehicle_rental/build/web"
+html_handling = "auto-trailing-slash"
+not_found_handling = "single-page-application"
+
